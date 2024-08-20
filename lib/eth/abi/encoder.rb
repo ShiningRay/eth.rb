@@ -188,6 +188,7 @@ module Eth
       def tuple(arg, type)
         raise EncodingError, "Expecting Hash: #{arg}" unless arg.instance_of? Hash
         raise EncodingError, "Expecting #{type.components.size} elements: #{arg}" unless arg.size == type.components.size
+        arg = arg.transform_keys(&:to_s) # because component_type.name is String
 
         static_size = 0
         type.components.each_with_index do |component, i|
@@ -210,7 +211,15 @@ module Eth
             dynamic_values << dynamic_value
             dynamic_offset += dynamic_value.size
           else
-            offsets_and_static_values << type(component_type, arg.is_a?(Array) ? arg[i] : arg[component_type.name])
+            a = if arg.is_a?(Array)
+              arg[i]
+            else
+              unless arg.key?(component_type.name)
+                raise EncodingError, "Missing key: #{component_type.name} in #{arg}"
+              end
+              arg[component_type.name]
+            end
+            offsets_and_static_values << type(component_type, a)
           end
         end
 
