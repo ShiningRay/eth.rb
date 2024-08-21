@@ -186,7 +186,7 @@ module Eth
 
       # Properly encodes tuples.
       def tuple(arg, type)
-        raise EncodingError, "Expecting Hash: #{arg}" unless arg.instance_of? Hash
+        raise EncodingError, "Expecting Hash: #{arg}" unless arg.is_a? Hash
         raise EncodingError, "Expecting #{type.components.size} elements: #{arg}" unless arg.size == type.components.size
         arg = arg.transform_keys(&:to_s) # because component_type.name is String
 
