@@ -123,7 +123,21 @@ module Eth
 
       # Properly encodes unsigned integers.
       def uint(arg, type)
-        raise ArgumentError, "Don't know how to handle this input." unless arg.is_a? Numeric
+        arg = case arg
+        when String
+          if arg =~ /\A0x[0-9a-fA-F]+\z/
+            arg.hex
+          elsif arg =~ /\A[0-9]+\z/
+            arg.to_i
+          else
+            raise ArgumentError, "Cannot convert to uint: #{arg}"
+          end
+        when Numeric
+          arg
+        else
+          raise ArgumentError, "Don't know how to handle this input:  #{arg}"
+        end
+
         raise ValueOutOfBounds, "Number out of range: #{arg}" if arg > Constant::UINT_MAX or arg < Constant::UINT_MIN
         real_size = type.sub_type.to_i
         i = arg.to_i
