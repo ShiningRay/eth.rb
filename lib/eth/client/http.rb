@@ -60,13 +60,12 @@ module Eth
     # @param payload [Hash] the RPC request parameters.
     # @return [String] a JSON-encoded response.
     def send_request(payload)
-      http = Net::HTTP.new(@host, @port)
-      http.use_ssl = @ssl
       header = { "Content-Type" => "application/json" }
-      request = Net::HTTP::Post.new(@uri, header)
-      request.body = payload
-      response = http.request(request)
-      response.body
+      res = Typhoeus.post(@uri, headers: header, timeout: 60, connecttimeout: 30, body: payload)
+      if res.timed_out?
+        raise "Request timed out"
+      end
+      res.body
     end
   end
 

@@ -51,4 +51,6 @@ Gem::Specification.new do |spec|
 
   # scrypt for encrypted key derivation
   spec.add_dependency "scrypt", "~> 3.0"
+
+  spec.add_dependency "typhoeus", "~> 1.0"
 end
