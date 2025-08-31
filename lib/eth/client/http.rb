@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require "net/http"
+require "httpx"
 
 # Provides the {Eth} module.
 module Eth
@@ -35,6 +35,9 @@ module Eth
     # Attribute for user.
     attr_reader :user
 
+    # httpx client instance
+    attr_reader :http
+
     # Constructor for the HTTP Client. Should not be used; use
     # {Client.create} instead.
     #
@@ -46,17 +49,19 @@ module Eth
       @host = uri.host
       @port = uri.port
       @ssl = uri.scheme == "https"
+      @http = HTTPX.with(pool_options: { max_connections: ENV.fetch("HTTP_MAX_CONNECTIONS", 10).to_i, max_connections_per_origin: ENV.fetch("HTTP_MAX_CONNECTIONS_PER_ORIGIN", 5).to_i, pool_timeout: ENV.fetch("HTTP_POOL_TIMEOUT", 10).to_i }).plugin(:persistent)
+
+      if ENV['HTTP_KEEPALIVE_TIMEOUT']
+        @http = @http.with(timeout: {keep_alive_timeout: ENV.fetch("HTTP_KEEPALIVE_TIMEOUT", 300).to_i})
+      end
+
       if !(uri.user.nil? && uri.password.nil?)
         @user = uri.user
         @password = uri.password
-        if uri.query
-          @uri = URI("#{uri.scheme}://#{uri.user}:#{uri.password}@#{@host}:#{@port}#{uri.path}?#{uri.query}")
-        else
-          @uri = URI("#{uri.scheme}://#{uri.user}:#{uri.password}@#{@host}:#{@port}#{uri.path}")
-        end
-      else
-        @uri = uri
+        @http = @http.plugin(:basic_auth).with(@user, @password )
       end
+      @uri = host
+      @http = @http.with(headers: { "Content-Type" => "application/json" })
     end
 
     # Sends an RPC request to the connected HTTP client.
@@ -64,13 +69,9 @@ module Eth
     # @param payload [Hash] the RPC request parameters.
     # @return [String] a JSON-encoded response.
     def send_request(payload)
-      http = Net::HTTP.new(@host, @port)
-      http.use_ssl = @ssl
-      header = { "Content-Type" => "application/json" }
-      request = Net::HTTP::Post.new(@uri, header)
-      request.body = payload
-      response = http.request(request)
-      response.body
+      response = http.post(@uri, body: payload)
+      response.raise_for_status
+      response.to_s
     end
   end
 

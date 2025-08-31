@@ -480,6 +480,7 @@ module Eth
         id: next_id,
       }
       output = JSON.parse(send_request(payload.to_json))
+
       if (err = output["error"])
         raise RpcError.new(err["message"], err["data"])
       end
