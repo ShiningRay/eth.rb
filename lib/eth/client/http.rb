@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "uri"
 require "httpx"
 
 # Provides the {Eth} module.
@@ -60,8 +61,9 @@ module Eth
         @password = uri.password
         @http = @http.plugin(:basic_auth).with(@user, @password )
       end
-      @uri = host
+      
       @http = @http.with(headers: { "Content-Type" => "application/json" })
+      @client = HTTPX.plugin(:persistent).with(headers: { "Content-Type" => "application/json" })
     end
 
     # Sends an RPC request to the connected HTTP client.

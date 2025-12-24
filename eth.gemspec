@@ -52,12 +52,15 @@ Gem::Specification.new do |spec|
   # openssl for encrypted key derivation
   spec.add_dependency "openssl", "~> 3.3"
 
+  # base64 is required explicitly in Ruby >= 3.4
+  spec.add_dependency "base64", "~> 0.1"
+
   # scrypt for encrypted key derivation
   spec.add_dependency "scrypt", "~> 3.0"
 
   # bls12-381 for BLS signatures and pairings
   spec.add_dependency "bls12-381", "~> 0.3"
 
-  # for http requesting, support HTTP2, persistent connections, and connection pooling
-  spec.add_dependency "httpx", "~> 1.5.0"
+  # httpx for HTTP/2 and persistent connections
+  spec.add_dependency "httpx", "~> 1.6"
 end
