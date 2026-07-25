@@ -2,6 +2,8 @@
 
 source "https://rubygems.org"
 
+gem "bigdecimal", ENV.fetch("BIGDECIMAL_VERSION", "~> 4.0")
+
 group :test, :development do
   gem "bundler", ">= 2.4"
   gem "pry", "~> 0.15"
