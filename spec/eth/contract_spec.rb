@@ -118,6 +118,39 @@ describe Contract do
     end
   end
 
+  describe "#decode_log" do
+    let(:erc20_abi) { JSON.parse(File.read("spec/fixtures/abi/ERC20.json")) }
+    subject(:erc20) { Contract.from_abi(name: "ERC20", abi: erc20_abi, address: addr) }
+
+    let(:topics) do
+      [
+        # Transfer event signature
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        # from
+        "0x00000000000000000000000071660c4005ba85c37ccec55d0c4493e66fe775d3",
+        # to
+        "0x000000000000000000000000639671019ddd8ec28d35113d8d1c5f1bbfd7e0be",
+      ]
+    end
+    let(:data) { "0x00000000000000000000000000000000000000000000000000000002540be400" }
+
+    it "decodes event logs by signature" do
+      decoded = erc20.decode_log(topics, data)
+      expect(decoded["from"]).to eq "0x71660c4005ba85c37ccec55d0c4493e66fe775d3"
+      expect(decoded["to"]).to eq "0x639671019ddd8ec28d35113d8d1c5f1bbfd7e0be"
+      expect(decoded["value"]).to eq 10000000000
+    end
+
+    it "accepts topics without hex prefix" do
+      decoded = erc20.decode_log(topics.map { |t| Eth::Util.remove_hex_prefix(t) }, data)
+      expect(decoded["from"]).to eq "0x71660c4005ba85c37ccec55d0c4493e66fe775d3"
+    end
+
+    it "raises for unknown event signatures" do
+      expect { erc20.decode_log(["0x#{"00" * 32}"], "0x") }.to raise_error ArgumentError, "this event does not exist!"
+    end
+  end
+
   describe "#function" do
     it "finds function by name" do
       expect(dummy_contract.function("set").name).to eq("set")
