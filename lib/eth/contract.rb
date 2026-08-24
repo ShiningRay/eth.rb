@@ -45,6 +45,10 @@ module Eth
       @bin = bin
       @abi = abi
       @constructor_inputs, @functions, @events, @errors = parse_abi(abi)
+      @sigs2events = {}
+      @events.each do |event|
+        @sigs2events[event.signature] = event
+      end
     end
 
     # Creates a contract wrapper from a Solidity file.
@@ -168,6 +172,7 @@ module Eth
         def_delegator :parent, :function
         def_delegator :parent, :error
         def_delegator :parent, :decode_error
+        def_delegator :parent, :decode_log
         def_delegator :parent, :constructor_inputs
         define_method :parent do
           parent
@@ -176,6 +181,21 @@ module Eth
       Eth::Contract.send(:remove_const, class_name) if Eth::Contract.const_defined?(class_name, false)
       Eth::Contract.const_set(class_name, class_methods)
       @class_object = class_methods
+    end
+
+    # Decodes an event log by looking up the event signature in the
+    # contract ABI.
+    #
+    # @param topics [Array<String>] the list of log topics, including the
+    #   event selector.
+    # @param data [String] the log data containing non-indexed parameters.
+    # @return [Hash] a hash of decoded event parameters.
+    # @raise [ArgumentError] if the event is not part of the contract ABI.
+    def decode_log(topics, data)
+      sig = Eth::Util.remove_hex_prefix(topics[0])
+      event = @sigs2events[sig]
+      raise ArgumentError, "this event does not exist!" if event.nil?
+      event.decode_params(topics, data)
     end
 
     private
