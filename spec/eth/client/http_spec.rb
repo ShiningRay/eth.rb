@@ -29,5 +29,16 @@ describe Client::Http do
       expect { client.close }.not_to raise_error
       expect { client.close }.not_to raise_error
     end
+
+    it "marks the client as closed" do
+      expect(client.closed?).to be_falsey
+      client.close
+      expect(client.closed?).to be_truthy
+    end
+
+    it "raises an IOError on subsequent requests" do
+      client.close
+      expect { client.eth_chain_id }.to raise_error(IOError, "The client is closed!")
+    end
   end
 end

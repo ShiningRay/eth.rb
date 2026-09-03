@@ -81,6 +81,7 @@ module Eth
     # use {Client.create} intead.
     def initialize(_)
       @id = 0
+      @closed = false
       @max_priority_fee_per_gas = Tx::DEFAULT_PRIORITY_FEE
       @max_fee_per_gas = Tx::DEFAULT_GAS_PRICE
     end
@@ -380,12 +381,20 @@ module Eth
 
     # Closes the client and releases any resources held by the underlying
     # connection, such as persistent HTTP connections or an open WebSocket
-    # stream. The default implementation is a no-op for clients without
-    # persistent resources (e.g., IPC); subclasses override it. Safe to
-    # call multiple times.
+    # stream. Once closed, the client cannot be used anymore; any
+    # subsequent request raises an {IOError}. Safe to call multiple times.
     #
     # @return [void]
-    def close; end
+    def close
+      @closed = true
+    end
+
+    # Checks whether the client has been closed via {#close}.
+    #
+    # @return [Boolean] true if the client is closed.
+    def closed?
+      !!@closed
+    end
 
     # Checks whether a transaction is mined or not.
     #
@@ -485,6 +494,7 @@ module Eth
 
     # Prepares parameters and sends the command to the client.
     def send_command(command, args)
+      raise IOError, "The client is closed!" if closed?
       @block_number ||= "latest"
       args << block_number if ["eth_getBalance", "eth_call"].include? command
       payload = {
