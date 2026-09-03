@@ -16,7 +16,6 @@ require "spec_helper"
 require "socket"
 
 describe Client::Ipc do
-
   subject(:client) { described_class.new("/tmp/geth.ipc") }
 
   describe "#send_request" do

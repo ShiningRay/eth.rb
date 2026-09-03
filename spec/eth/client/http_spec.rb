@@ -15,7 +15,6 @@
 require "spec_helper"
 
 describe Client::Http do
-
   subject(:client) { described_class.new("http://127.0.0.1:8545") }
 
   describe "#close" do
