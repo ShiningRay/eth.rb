@@ -69,6 +69,14 @@ module Eth
       response = @client.post(@uri, body: payload)
       response.body.to_s
     end
+
+    # Closes the underlying HTTP session and releases all persistent
+    # connections held in its pool. Safe to call multiple times.
+    #
+    # @return [void]
+    def close
+      @client.close
+    end
   end
 
   private

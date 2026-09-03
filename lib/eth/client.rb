@@ -378,6 +378,15 @@ module Eth
       @id = 0
     end
 
+    # Closes the client and releases any resources held by the underlying
+    # connection, such as persistent HTTP connections or an open WebSocket
+    # stream. The default implementation is a no-op for clients without
+    # persistent resources (e.g., IPC); subclasses override it. Safe to
+    # call multiple times.
+    #
+    # @return [void]
+    def close; end
+
     # Checks whether a transaction is mined or not.
     #
     # @param hash [String] the transaction hash.
