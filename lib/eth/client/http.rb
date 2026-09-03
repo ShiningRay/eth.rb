@@ -72,7 +72,7 @@ module Eth
 
     # Closes the underlying HTTP session and releases all persistent
     # connections held in its pool. Once closed, the client cannot be
-    # used anymore; any subsequent request raises an {IOError}. Safe to
+    # used anymore; any subsequent request raises an `IOError`. Safe to
     # call multiple times.
     #
     # @return [void]

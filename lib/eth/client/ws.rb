@@ -78,7 +78,7 @@ module Eth
 
     # Closes the underlying WebSocket connection. Once closed, the
     # client cannot be used anymore; any subsequent request raises an
-    # {IOError}. Safe to call multiple times.
+    # `IOError`. Safe to call multiple times.
     #
     # @return [void]
     def close

@@ -382,7 +382,7 @@ module Eth
     # Closes the client and releases any resources held by the underlying
     # connection, such as persistent HTTP connections or an open WebSocket
     # stream. Once closed, the client cannot be used anymore; any
-    # subsequent request raises an {IOError}. Safe to call multiple times.
+    # subsequent request raises an `IOError`. Safe to call multiple times.
     #
     # @return [void]
     def close
